@@ -14,4 +14,9 @@ interaction = client.models.generate_content(
     model="gemini-3.5-flash", contents="Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum."
 )
 
-print(interaction.text)
+if not interaction.usage_metadata:
+    raise RuntimeError("api response failed")
+print("User prompt: Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.")
+print(f"Prompt tokens: {interaction.usage_metadata.prompt_token_count}")
+print(f"Response tokens: {interaction.usage_metadata.candidates_token_count}")
+print("Response:\n", interaction.text)
