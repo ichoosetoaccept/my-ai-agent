@@ -1,22 +1,34 @@
+import argparse
 import os
 
 from dotenv import load_dotenv
-from google import genai
+from openai import OpenAI
 
 load_dotenv()
 
-api_key = os.environ.get("GEMINI_API_KEY")
+api_key = os.environ.get("OPENROUTER_API_KEY")
 if not api_key:
     raise RuntimeError("no api key found")
 
-client = genai.Client(api_key=api_key)
-interaction = client.models.generate_content(
-    model="gemini-3.5-flash", contents="Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum."
+parser = argparse.ArgumentParser(description="Chatbot")
+parser.add_argument("user_prompt", type=str, help="User prompt")
+args = parser.parse_args()
+
+client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+
+response = client.chat.completions.create(
+    model="openrouter/free",
+    messages=[
+        {
+            "role": "user",
+            "content": args.user_prompt,
+        }
+    ],
 )
 
-if not interaction.usage_metadata:
+if response.usage is None:
     raise RuntimeError("api response failed")
-print("User prompt: Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.")
-print(f"Prompt tokens: {interaction.usage_metadata.prompt_token_count}")
-print(f"Response tokens: {interaction.usage_metadata.candidates_token_count}")
-print("Response:\n", interaction.text)
+print(f"User prompt: {args.user_prompt}")
+print(f"Prompt tokens: {response.usage.prompt_tokens}")
+print(f"Response tokens: {response.usage.completion_tokens}")
+print("Response:\n", response.choices[0].message.content)
