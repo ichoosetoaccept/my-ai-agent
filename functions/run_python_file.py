@@ -28,7 +28,7 @@ def run_python_file(working_directory: str, file_path: str, args: list[str] | No
         if args:
             command.extend(args)
 
-        completed_process = subprocess.run(args=command, cwd=absolute_path_working_dir, capture_output=True, text=True, timeout=30)
+        completed_process = subprocess.run(args=command, cwd=absolute_path_working_dir, capture_output=True, text=True, timeout=30, check=False)
 
         output_string: list[str] = []
 

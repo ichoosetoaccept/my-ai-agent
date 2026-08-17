@@ -8,3 +8,21 @@ dependencies = [
     "openai==2.44.0",
     "python-dotenv==1.1.0",
 ]
+
+[tool.ruff]
+line-length = 200
+
+[tool.ruff.lint]
+# Additions to ruff's defaults, not a replacement for them: new rules in future
+# ruff releases still arrive on their own.
+extend-select = [
+    "RUF",  # ruff's own rules - incl. RUF001-003, the paste-damage detector
+    "UP",   # pyupgrade - flags syntax that's outdated for this project's Python
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tool handlers are the boundary the LLM calls: every failure has to come back
+# as a string it can read, so catching Exception is the contract, not a slip.
+"functions/*.py" = ["BLE001"]
+# calculator/ is course-supplied sample code, not mine to restyle.
+"calculator/**/*.py" = ["BLE001"]
