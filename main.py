@@ -1,12 +1,11 @@
 import argparse
-import json
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-from call_function import available_functions
+from call_function import available_functions, call_function
 from prompts import system_prompt
 
 load_dotenv()
@@ -28,7 +27,7 @@ messages: list[ChatCompletionMessageParam] = [
 ]
 
 response = client.chat.completions.create(
-    model="openrouter/free",
+    model="deepseek/deepseek-v4-flash",
     messages=messages,
     tools=available_functions,
     temperature=0,
@@ -48,7 +47,10 @@ if message.tool_calls:
     for tool_call in message.tool_calls:
         if tool_call.type != "function":
             continue
-        function_args = json.loads(tool_call.function.arguments or "{}")
-        print(f"Calling function: {tool_call.function.name}({function_args})")
+        result_message = call_function(tool_call, verbose=args.verbose)
+        if not result_message["content"]:
+            raise RuntimeError(f"no content returned from {tool_call.function.name}")
+        if args.verbose:
+            print(f"-> {result_message['content']}")
 else:
     print("Response:\n", message.content)
