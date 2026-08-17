@@ -1,10 +1,12 @@
 import argparse
+import json
 import os
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
+from call_function import available_functions
 from prompts import system_prompt
 
 load_dotenv()
@@ -28,8 +30,11 @@ messages: list[ChatCompletionMessageParam] = [
 response = client.chat.completions.create(
     model="openrouter/free",
     messages=messages,
+    tools=available_functions,
     temperature=0,
 )
+
+message = response.choices[0].message
 
 if response.usage is None:
     raise RuntimeError("api response failed")
@@ -39,4 +44,11 @@ if args.verbose:
     print(f"Prompt tokens: {response.usage.prompt_tokens}")
     print(f"Response tokens: {response.usage.completion_tokens}")
 
-print("Response:\n", response.choices[0].message.content)
+if message.tool_calls:
+    for tool_call in message.tool_calls:
+        if tool_call.type != "function":
+            continue
+        function_args = json.loads(tool_call.function.arguments or "{}")
+        print(f"Calling function: {tool_call.function.name}({function_args})")
+else:
+    print("Response:\n", message.content)
