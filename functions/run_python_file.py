@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from openai.types.chat import ChatCompletionFunctionToolParam
+
 
 def run_python_file(working_directory: str, file_path: str, args: list[str] | None = None) -> str:
     try:
@@ -46,3 +48,26 @@ def run_python_file(working_directory: str, file_path: str, args: list[str] | No
 
     except Exception as e:
         return f"Error: executing Python file: {e}"
+
+schema_run_python_file: ChatCompletionFunctionToolParam = {
+    "type": "function",
+    "function": {
+        "name": "run_python_file",
+        "description": "Runs or executes a Python file with the Python interpreter and returns its stdout and stderr. Use this whenever the user asks to run, execute, or launch a Python script.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "Path to the Python file to execute, relative to the working directory",
+                },
+                "args": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "An optional list of arguments to be passed when executing the Python code",
+                },
+            },
+            "required": ["file_path"],
+        },
+    },
+}
