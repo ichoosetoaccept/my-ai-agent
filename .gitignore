@@ -8,3 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Coding agent / editor tooling
+.serena/
+.claude/
+.cursor/
+CLAUDE.md
+AGENTS.md
+
+# Scratch files written by exercises
+calculator/agent_note.txt
